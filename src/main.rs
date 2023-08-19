@@ -8,8 +8,8 @@
  * 
  */
 
-pub mod error_handling;
-
+//pub mod token_handler/error_handler;
+pub mod token_handler;
 use std::env;
 use std::fs;
 use std::io::Write;
@@ -17,6 +17,7 @@ use std::io::Write;
 fn _run(source: String)
 {
     println!("Input: {input}", input=source);
+    token_handler::scan_tokens(source);
 }
 
 fn _run_prompt()
