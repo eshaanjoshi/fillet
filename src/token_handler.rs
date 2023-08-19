@@ -1,69 +1,11 @@
-
+pub mod built_in;
 pub mod error_handler;
-#[derive(Debug)]
+use std::collections::HashMap;
+use built_in::token_enums::LiteralData;
+use built_in::token_enums::Tokentype;
+use built_in::create_new_keyword_dict;
 
-
-
-enum LiteralData{
-    NUM(i32),
-    STR(String),
-    BOOL(bool),
-    NONE,
-}
-
-
-
-#[derive(PartialEq)]
-#[derive(Debug)]
-enum Tokentype
-{
-    LEFTP,
-    RIGHTP,
-    LEFTB,
-    RIGHTB,
-    COMMA,
-    PERIOD,
-    MIN,
-    PLUS,
-    SEMI,
-    FSLASH,
-    STAR,
-
-
-    BANG,
-    BANG_EQUAL,
-    EQUAL,
-    EQUAL_EQUAL,
-    GREATER,
-    GREATER_EQUAL,
-    LESS,
-    LESS_EQUAL,
-
-    IDENTIFIER,
-    STRING,
-    NUMBER,
-
-    AND,
-    CLASS,
-    ELSE,
-    FALSE,
-    FUN,
-    FOR,
-    IF, 
-    NIL,
-    OR,
-    PRINT,
-    RETURN,
-    SUPER,
-    THIS,
-    TRUE,
-    VAR,
-    WHILE,
-
-    EOF,
-    USELESS,
-}
-
+lazy_static!{static ref  kw:HashMap<String, Tokentype> =create_new_keyword_dict();}
 
 pub struct token
 {
@@ -100,11 +42,11 @@ fn advance(source:&String, current:&mut usize) -> char
     return c;
 }
 
-fn add_token(ty:Tokentype, obj:LiteralData, line:usize, current:usize, start:usize, source:&String)->token
+fn add_token(ty:Tokentype, obj:LiteralData, line:&mut usize, current:usize, start:usize, source:&String)->token
 {
     let text:String = source[start..current].to_string();
-    let mut t = token::new(ty, text, obj, line);
-    println!("{}", t._strrep());
+    let mut t = token::new(ty, text, obj, *line);
+    if ty!=Tokentype::USELESS {println!("{}", t._strrep());}
     return t;
 }
 
@@ -128,6 +70,11 @@ fn peek(current:&mut usize, source:&String)->char
     return source.as_bytes()[*current] as char;
 }
 
+fn peek_next(current:&mut usize, source:&String) -> char
+{
+    return peek(&mut (*current+1), source);
+}
+
 fn parse_string(current:&mut usize, source:&String, line: &mut usize, start:usize)->token
 {
     while peek(current, source)!='"' && (*current < source.len())
@@ -143,10 +90,59 @@ fn parse_string(current:&mut usize, source:&String, line: &mut usize, start:usiz
 
     advance(source, current);
     let value: String = source[start+1..*current-1].to_string();
-    return add_token(Tokentype::STRING, LiteralData::STR(value) , *line, *current, start, source);
+    return add_token(Tokentype::STRING, LiteralData::STR(value) , line, *current, start, source);
 }
 
-fn scan_token(source:&String, current:&mut usize, start:usize, mut line:usize) -> token
+fn is_digit(c:char)->bool
+{
+    return c.is_ascii_digit();
+}
+
+fn is_alpha(c:char)->bool
+{
+    return c.is_ascii_alphabetic();
+}
+
+fn parse_number(c:char, current:&mut usize, source:&String, start:usize, mut line:usize)->token
+{
+    let mut is_decimal = false;
+    while is_digit(peek(current, source)) {advance(source, current);}
+
+    if peek(current, source) == '.' && is_digit(peek_next(current, source))
+    {
+        is_decimal=true;
+        advance(source, current);
+        while is_digit(peek(current, source))
+        {
+            advance(source, current);
+        }
+    }
+    let value: String = source[start..*current].to_string();
+    if is_decimal
+    {
+         return add_token(Tokentype::NUMBER, LiteralData::FLOAT(value.parse::<f32>().unwrap()), &mut line, *current, start, source);
+    }
+    return add_token(Tokentype::NUMBER, LiteralData::NUM(value.parse::<i32>().unwrap()), &mut line, *current, start, source);
+
+}
+
+fn parse_identifier(c:char, current:&mut usize, source:&String, start:usize, mut line:usize)->token
+{
+    while peek(current, source).is_ascii_alphanumeric()
+    {
+        advance(source, current);
+    }
+    let value: String = source[start..*current].to_string();
+    let mut ttype:Tokentype;
+    match kw.get(&value)
+    {
+        Some(ttoken) => ttype = *ttoken,
+        None => ttype = Tokentype::IDENTIFIER,
+    }
+    return add_token(ttype, LiteralData::NONE, &mut line, *current, start, source);
+}
+
+fn scan_token(source:&String, current:&mut usize, start:usize, line:&mut usize) -> token
 {
     let c:char = advance(source, current);
     println!("Char read {} {}", c, current);
@@ -173,8 +169,6 @@ fn scan_token(source:&String, current:&mut usize, start:usize, mut line:usize) -
                     advance(source, current);
                 }
                 println!("Comment");
-                //return token::new(Tokentype::USELESS, "".to_string(), LiteralData::NONE, 0);
-                //return add_token(Tokentype::USELESS, LiteralData::NONE, line, *current, start, source);
                 return useless_token();
             }
             else
@@ -184,10 +178,26 @@ fn scan_token(source:&String, current:&mut usize, start:usize, mut line:usize) -
         }
         '"' =>
         {
-            return parse_string(current, source, &mut line, start);
+            return parse_string(current, source, line, start);
+        }
+        ' ' | '\r' | '\t' =>
+        {
+            return useless_token();
+        }
+        '\n' =>{
+            *line+=1;
+            return useless_token();
         }
         other => {
-            error_handler::error(line, format!("Unexpected Character {}", other));
+            if is_digit(c)
+            {
+                return parse_number(c, current, source, start, *line);
+            }
+            if is_alpha(c)
+            {
+                return parse_identifier(c, current, source, start, *line);
+            }
+            error_handler::error(*line, format!("Unexpected Character {}", other));
             return token::new(Tokentype::USELESS, "lol".to_string(), LiteralData::NONE, 1)
         }
     }
@@ -200,6 +210,9 @@ fn print_token_list(token_list:&mut Vec<token>)
     }
 }
 
+
+
+
 pub fn scan_tokens(source:String) -> Vec<token>
 {
     let mut token_list:Vec<token> = Vec::new();
@@ -210,7 +223,7 @@ pub fn scan_tokens(source:String) -> Vec<token>
     while !(current >= size)
     {
         start = current;
-        let t = scan_token(&source, &mut current, start, line);
+        let t = scan_token(&source, &mut current, start, &mut line);
         if t.t_type != Tokentype::USELESS {token_list.push(t)}
     }
     token_list.push(token::new(Tokentype::EOF, "".to_string(), LiteralData::NONE, line));

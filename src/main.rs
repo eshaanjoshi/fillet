@@ -7,8 +7,8 @@
  * Note: At the time of writing this code, I had zero familiarity with Rust. I wanted to learn the language and dive into a project I found interesting, and translating the Java/C heavy book to Rust felt interesting.
  * 
  */
-
-//pub mod token_handler/error_handler;
+#[macro_use]
+extern crate lazy_static;
 pub mod token_handler;
 use std::env;
 use std::fs;
