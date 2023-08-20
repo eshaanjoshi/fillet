@@ -19,7 +19,10 @@ fn _run(source: String)
     println!("Input: {input}", input=source);
     token_handler::scan_tokens(source);
 }
-
+fn _create(source:i32) -> bool
+{
+    return false;
+}
 fn _run_prompt()
 {
     println!("Running Prompt");
