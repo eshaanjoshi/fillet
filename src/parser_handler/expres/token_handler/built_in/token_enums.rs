@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum LiteralData {
     NUM(i32),
     FLOAT(f32),
@@ -33,6 +33,7 @@ pub enum Tokentype {
     IDENTIFIER,
     STRING,
     NUMBER,
+    FLOAT,
 
     AND,
     CLASS,

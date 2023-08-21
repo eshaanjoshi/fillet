@@ -11,10 +11,10 @@ lazy_static! {
 
 #[derive(Clone, Debug)]
 pub struct token {
-    t_type: Tokentype,
-    lexeme: String,
-    literal: LiteralData,
-    line: usize,
+    pub t_type: Tokentype,
+    pub lexeme: String,
+    pub literal: LiteralData,
+    pub line: usize,
 }
 
 trait Strrep {
@@ -38,7 +38,7 @@ impl token {
     }
 }
 
-fn useless_token() -> token {
+pub fn useless_token() -> token {
     return token::new(Tokentype::USELESS, String::new(), LiteralData::NONE, 0);
 }
 

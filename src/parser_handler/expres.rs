@@ -5,7 +5,8 @@ pub mod token_handler;
 
 #[derive(Debug, Clone)]
 pub enum Expr{
-    Literal(Literal),
+    Useless,
+    Literal(token_handler::built_in::token_enums::LiteralData),
     This(SourceLocation),
     Unary(UnaryOp, Box<Expr>),
     Binary(Box<Expr>, BinaryOp, Box<Expr>),
@@ -93,9 +94,10 @@ pub enum UnaryOpTy{
     Bang,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct UnaryOp{
     pub ty: UnaryOpTy,
+    //pub ty:token_handler::token,
     pub line: usize,
     pub col: i64,
 }
@@ -115,9 +117,10 @@ pub enum BinaryOpTy{
 }
 
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct BinaryOp {
     pub ty: BinaryOpTy,
+    //pub ty: token_handler::token,
     pub line: usize,
     pub col: i64,
 }
@@ -132,3 +135,5 @@ pub enum Literal {
     False,
     Nil,
 }
+
+

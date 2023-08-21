@@ -14,7 +14,7 @@
 #[macro_use]
 extern crate lazy_static;
 pub mod parser_handler;
-use parser_handler::expr::token_handler;
+use parser_handler::expres::token_handler;
 use std::env;
 use std::fs;
 use std::io::Write;
@@ -23,8 +23,9 @@ use std::io::Write;
 fn _run(source: String) {
     println!("Input: {input}", input = source);
     let mut t = token_handler::scan_tokens(source);
-    parser_handler::parse_token_list(&mut t);
+    let expr = parser_handler::parse_token_list(&mut t);
     token_handler::print_token_list(&mut t);
+    println!("{:?}", expr);
 }
 fn _run_prompt() {
     println!("Running Prompt");
