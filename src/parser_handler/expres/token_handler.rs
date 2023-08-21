@@ -4,8 +4,9 @@ use built_in::create_new_keyword_dict;
 use built_in::token_enums::LiteralData;
 use built_in::token_enums::Tokentype;
 use std::collections::HashMap;
-///global keyword dictionary
+
 lazy_static! {
+    ///global keyword dictionary
     static ref kw: HashMap<String, Tokentype> = create_new_keyword_dict();
 }
 

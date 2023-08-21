@@ -10,7 +10,7 @@ use token_handler::built_in::token_enums::Tokentype;
 
 use self::expres::token_handler::error_handler;
 ///Parser struct
-pub struct parser {
+pub struct Parser {
     token_list: Vec<token_handler::token>,
     current: usize,
 }
@@ -39,10 +39,10 @@ fn unary_parser(op: token_handler::token) -> expres::UnaryOpTy {
     }
 }
 ///Parser implementation. Uses a hierarchical organization to convert from a list of tokens to an asbtract syntax tree
-impl parser {
+impl Parser {
     ///generates new parser type
-    fn new(tok_list: Vec<token_handler::token>) -> parser {
-        return parser {
+    fn new(tok_list: Vec<token_handler::token>) -> Parser {
+        return Parser {
             token_list: tok_list,
             current: 0,
         };
@@ -223,6 +223,6 @@ impl parser {
 }
 ///Publiicizes token_list parser
 pub fn parse_token_list(token_list: &mut Vec<token_handler::token>) -> Expr {
-    let mut p = parser::new(token_list.clone());
+    let mut p = Parser::new(token_list.clone());
     return p.expression();
 }
