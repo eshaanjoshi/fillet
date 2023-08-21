@@ -1,10 +1,9 @@
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
-
 pub mod token_handler;
 
 #[derive(Debug, Clone)]
-pub enum Expr{
+pub enum Expr {
     Useless,
     Literal(token_handler::built_in::token_enums::LiteralData),
     This(SourceLocation),
@@ -31,9 +30,7 @@ pub enum Expr{
         source_location: SourceLocation,
     },
     Lambda(LambdaDecl),
-
 }
-
 
 #[derive(Debug, Clone, Copy)]
 pub struct SourceLocation {
@@ -49,7 +46,7 @@ pub enum LogicalOp {
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub struct Symbol {
-    pub name:String,
+    pub name: String,
     pub line: usize,
     pub col: i64,
 }
@@ -61,7 +58,6 @@ pub struct FunDecl {
     pub body: Vec<Stmt>,
 }
 
-
 #[derive(Debug, Clone)]
 pub struct LambdaDecl {
     pub params: Vec<Symbol>,
@@ -69,8 +65,8 @@ pub struct LambdaDecl {
 }
 
 #[derive(Debug, Clone)]
-pub struct ClassDecl{
-    pub name:Symbol,
+pub struct ClassDecl {
+    pub name: Symbol,
     pub superclass: Option<Symbol>,
     pub methods: Vec<FunDecl>,
 }
@@ -89,13 +85,13 @@ pub enum Stmt {
 }
 
 #[derive(Debug, Copy, Clone)]
-pub enum UnaryOpTy{
+pub enum UnaryOpTy {
     Minus,
     Bang,
 }
 
 #[derive(Debug, Clone)]
-pub struct UnaryOp{
+pub struct UnaryOp {
     pub ty: UnaryOpTy,
     //pub ty:token_handler::token,
     pub line: usize,
@@ -103,7 +99,7 @@ pub struct UnaryOp{
 }
 
 #[derive(Debug, Copy, Clone)]
-pub enum BinaryOpTy{
+pub enum BinaryOpTy {
     EqualEqual,
     NotEqual,
     Less,
@@ -116,7 +112,6 @@ pub enum BinaryOpTy{
     Slash,
 }
 
-
 #[derive(Debug, Clone)]
 pub struct BinaryOp {
     pub ty: BinaryOpTy,
@@ -124,7 +119,6 @@ pub struct BinaryOp {
     pub line: usize,
     pub col: i64,
 }
-
 
 #[derive(Debug, Clone)]
 pub enum Literal {
@@ -135,5 +129,3 @@ pub enum Literal {
     False,
     Nil,
 }
-
-

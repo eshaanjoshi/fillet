@@ -132,12 +132,7 @@ fn is_alpha(c: char) -> bool {
     return c.is_ascii_alphabetic();
 }
 
-fn parse_number(
-    current: &mut usize,
-    source: &String,
-    start: usize,
-    mut line: usize,
-) -> token {
+fn parse_number(current: &mut usize, source: &String, start: usize, mut line: usize) -> token {
     let mut is_decimal = false;
     while is_digit(peek(current, source)) {
         advance(source, current);
@@ -171,12 +166,7 @@ fn parse_number(
     );
 }
 
-fn parse_identifier(
-    current: &mut usize,
-    source: &String,
-    start: usize,
-    mut line: usize,
-) -> token {
+fn parse_identifier(current: &mut usize, source: &String, start: usize, mut line: usize) -> token {
     while peek(current, source).is_ascii_alphanumeric() {
         advance(source, current);
     }

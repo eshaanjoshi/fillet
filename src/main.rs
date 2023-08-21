@@ -1,4 +1,3 @@
-
 /**
  * Author: Eshaan Joshi, evj@andrew.cmu.edu
  *
@@ -10,7 +9,6 @@
  */
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
-
 #[macro_use]
 extern crate lazy_static;
 pub mod parser_handler;
@@ -18,7 +16,6 @@ use parser_handler::expres::token_handler;
 use std::env;
 use std::fs;
 use std::io::Write;
-
 
 fn _run(source: String) {
     println!("Input: {input}", input = source);
