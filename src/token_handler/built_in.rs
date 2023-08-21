@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 pub mod token_enums;
 use token_enums::Tokentype;
-pub  fn create_new_keyword_dict()->HashMap<String, Tokentype>
-{
+pub fn create_new_keyword_dict() -> HashMap<String, Tokentype> {
     let mut keyword_dict = HashMap::new();
     keyword_dict.insert("and".to_string(), Tokentype::AND);
     keyword_dict.insert("class".to_string(), Tokentype::CLASS);

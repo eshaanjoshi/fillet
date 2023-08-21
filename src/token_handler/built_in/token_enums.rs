@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub enum LiteralData{
+pub enum LiteralData {
     NUM(i32),
     FLOAT(f32),
     STR(String),
@@ -7,12 +7,8 @@ pub enum LiteralData{
     NONE,
 }
 
-
-
-#[derive(PartialEq)]
-#[derive(Debug, Clone, Copy)]
-pub enum Tokentype
-{
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub enum Tokentype {
     LEFTP,
     RIGHTP,
     LEFTB,
@@ -24,7 +20,6 @@ pub enum Tokentype
     SEMI,
     FSLASH,
     STAR,
-
 
     BANG,
     BANG_EQUAL,
@@ -45,7 +40,7 @@ pub enum Tokentype
     FALSE,
     FUN,
     FOR,
-    IF, 
+    IF,
     NIL,
     OR,
     PRINT,
