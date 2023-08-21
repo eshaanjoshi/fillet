@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-pub mod token_enums;
+//pub mod token_enums;
+use crate::token_enums;
 use token_enums::Tokentype;
 ///This function generates the keyword dictionary used by the parser.
 pub fn create_new_keyword_dict() -> HashMap<String, Tokentype> {

@@ -1,12 +1,12 @@
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
-pub mod token_handler;
-
+//pub mod token_handler;
+use crate::token_enums;
 #[derive(Debug, Clone)]
 ///enum containing all expressions our parser looks for
 pub enum Expr {
     Useless,
-    Literal(token_handler::built_in::token_enums::LiteralData),
+    Literal(token_enums::LiteralData),
     This(SourceLocation),
     Unary(UnaryOp, Box<Expr>),
     Binary(Box<Expr>, BinaryOp, Box<Expr>),

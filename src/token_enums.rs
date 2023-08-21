@@ -1,3 +1,4 @@
+#![allow(non_camel_case_types)]
 #[derive(Debug, Clone, PartialEq)]
 ///This enum contains the data of the token to be read by the parser. Only contains data for the primitives
 pub enum LiteralData {

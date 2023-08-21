@@ -1,18 +1,25 @@
-pub mod built_in;
-pub mod error_handler;
+//pub mod built_in;
+//pub mod built_in;
+//pub mod error_handler;
+//pub mod expres;
+//pub mod token_handler;
+use crate::built_in;
 use built_in::create_new_keyword_dict;
-use built_in::token_enums::LiteralData;
-use built_in::token_enums::Tokentype;
+//use built_in::token_enums::LiteralData;
+//use built_in::token_enums::Tokentype;
+use crate::token_enums::LiteralData;
+use crate::token_enums::Tokentype;
+use crate::error_handler;
 use std::collections::HashMap;
 
 lazy_static! {
     ///global keyword dictionary
-    static ref kw: HashMap<String, Tokentype> = create_new_keyword_dict();
+    static ref KW: HashMap<String, Tokentype> = create_new_keyword_dict();
 }
 
 #[derive(Clone, Debug)]
 ///This struct represents an individual token that our interpreter generates
-pub struct token {
+pub struct Token {
     pub t_type: Tokentype,
     pub lexeme: String,
     pub literal: LiteralData,
@@ -20,9 +27,9 @@ pub struct token {
 }
 
 ///Implementation on the tokens struct, implements a new and a string representation
-impl token {
-    fn new(ty: Tokentype, lex: String, obj: LiteralData, li: usize) -> token {
-        return token {
+impl Token {
+    fn new(ty: Tokentype, lex: String, obj: LiteralData, li: usize) -> Token {
+        return Token {
             t_type: (ty),
             lexeme: (lex),
             literal: (obj),
@@ -38,8 +45,8 @@ impl token {
 }
 
 ///Generates a useless token to be thrown away by the parser
-pub fn useless_token() -> token {
-    return token::new(Tokentype::USELESS, String::new(), LiteralData::NONE, 0);
+pub fn useless_token() -> Token {
+    return Token::new(Tokentype::USELESS, String::new(), LiteralData::NONE, 0);
 }
 
 ///Advances the scanner by one character, and returns the character consumed
@@ -57,9 +64,9 @@ fn add_token(
     current: usize,
     start: usize,
     source: &String,
-) -> token {
+) -> Token {
     let text: String = source[start..current].to_string();
-    let mut t = token::new(ty, text, obj, *line);
+    let mut t = Token::new(ty, text, obj, *line);
     if ty != Tokentype::USELESS {
         println!("{}", t._strrep());
     }
@@ -105,7 +112,7 @@ fn peek_next(current: &mut usize, source: &String) -> char {
 }
 
 ///Parses from source as if looking for a string
-fn parse_string(current: &mut usize, source: &String, line: &mut usize, start: usize) -> token {
+fn parse_string(current: &mut usize, source: &String, line: &mut usize, start: usize) -> Token {
     while peek(current, source) != '"' && (*current < source.len()) {
         if peek(current, source) == '\n' {
             *line += 1;
@@ -137,7 +144,7 @@ fn is_alpha(c: char) -> bool {
     return c.is_ascii_alphabetic();
 }
 ///Parses from source as if number. Returns float or int depending on types
-fn parse_number(current: &mut usize, source: &String, start: usize, mut line: usize) -> token {
+fn parse_number(current: &mut usize, source: &String, start: usize, mut line: usize) -> Token {
     let mut is_decimal = false;
     while is_digit(peek(current, source)) {
         advance(source, current);
@@ -171,20 +178,20 @@ fn parse_number(current: &mut usize, source: &String, start: usize, mut line: us
     );
 }
 ///Parses from source as if it's an identifier
-fn parse_identifier(current: &mut usize, source: &String, start: usize, mut line: usize) -> token {
+fn parse_identifier(current: &mut usize, source: &String, start: usize, mut line: usize) -> Token {
     while peek(current, source).is_ascii_alphanumeric() {
         advance(source, current);
     }
     let value: String = source[start..*current].to_string();
     let ttype: Tokentype;
-    match kw.get(&value) {
+    match KW.get(&value) {
         Some(ttoken) => ttype = *ttoken,
         None => ttype = Tokentype::IDENTIFIER,
     }
     return add_token(ttype, LiteralData::NONE, &mut line, *current, start, source);
 }
 ///Scans from source and returns a token based on scanning
-fn scan_token(source: &String, current: &mut usize, start: usize, line: &mut usize) -> token {
+fn scan_token(source: &String, current: &mut usize, start: usize, line: &mut usize) -> Token {
     let c: char = advance(source, current);
     println!("Char read {} {}", c, current);
     match c {
@@ -392,19 +399,19 @@ fn scan_token(source: &String, current: &mut usize, start: usize, line: &mut usi
                 return parse_identifier(current, source, start, *line);
             }
             error_handler::error(*line, format!("Unexpected Character {}", other));
-            return token::new(Tokentype::USELESS, "lol".to_string(), LiteralData::NONE, 1);
+            return Token::new(Tokentype::USELESS, "lol".to_string(), LiteralData::NONE, 1);
         }
     }
 }
 ///Token List Printer
-pub fn print_token_list(token_list: &mut Vec<token>) {
+pub fn print_token_list(token_list: &mut Vec<Token>) {
     for tok in token_list.iter_mut() {
         println!("{}", tok._strrep());
     }
 }
 ///Scans entire source and returns a list of tokens based on the order they were found in the source
-pub fn scan_tokens(source: String) -> Vec<token> {
-    let mut token_list: Vec<token> = Vec::new();
+pub fn scan_tokens(source: String) -> Vec<Token> {
+    let mut token_list: Vec<Token> = Vec::new();
     let mut start: usize;
     let mut current: usize = 0;
     let size = source.len();
@@ -416,7 +423,7 @@ pub fn scan_tokens(source: String) -> Vec<token> {
             token_list.push(t)
         }
     }
-    token_list.push(token::new(
+    token_list.push(Token::new(
         Tokentype::EOF,
         "".to_string(),
         LiteralData::NONE,

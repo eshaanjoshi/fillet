@@ -12,7 +12,13 @@
 #[macro_use]
 extern crate lazy_static;
 pub mod parser_handler;
-use parser_handler::expres::token_handler;
+pub mod eval;
+pub mod expres;
+pub mod built_in;
+pub mod error_handler;
+pub mod token_enums;
+//use parser_handler::expres::token_handler;
+pub mod token_handler;
 use std::env;
 use std::fs;
 use std::io::Write;

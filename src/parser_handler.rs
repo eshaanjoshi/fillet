@@ -1,21 +1,23 @@
 #[allow(non_camel_case_types)]
-pub mod expres;
-
+use crate::expres;
 use std::process::exit;
-
-use expres::token_handler;
+use crate::token_handler;
+//use expres::token_handler;
 use expres::Expr;
-use token_handler::built_in::token_enums::LiteralData;
-use token_handler::built_in::token_enums::Tokentype;
-
-use self::expres::token_handler::error_handler;
+//use token_handler::built_in::token_enums::LiteralData;
+//use token_handler::built_in::token_enums::Tokentype;
+use crate::token_enums::LiteralData;
+use crate::token_enums::Tokentype;
+//use self::expres::token_handler::error_handler;
+//use token_handler::error_handler;
+use crate::error_handler;
 ///Parser struct
 pub struct Parser {
-    token_list: Vec<token_handler::token>,
+    token_list: Vec<token_handler::Token>,
     current: usize,
 }
 ///Gets BinaryOpTy from TokenType
-fn binary_parser(op: token_handler::token) -> expres::BinaryOpTy {
+fn binary_parser(op: token_handler::Token) -> expres::BinaryOpTy {
     match op.t_type {
         Tokentype::EQUAL_EQUAL => return expres::BinaryOpTy::EqualEqual,
         Tokentype::BANG_EQUAL => return expres::BinaryOpTy::NotEqual,
@@ -31,7 +33,7 @@ fn binary_parser(op: token_handler::token) -> expres::BinaryOpTy {
     }
 }
 ///Gets UnaryOpTy from Tokentype
-fn unary_parser(op: token_handler::token) -> expres::UnaryOpTy {
+fn unary_parser(op: token_handler::Token) -> expres::UnaryOpTy {
     match op.t_type {
         Tokentype::BANG => return expres::UnaryOpTy::Bang,
         Tokentype::MIN => return expres::UnaryOpTy::Minus,
@@ -41,7 +43,7 @@ fn unary_parser(op: token_handler::token) -> expres::UnaryOpTy {
 ///Parser implementation. Uses a hierarchical organization to convert from a list of tokens to an asbtract syntax tree
 impl Parser {
     ///generates new parser type
-    fn new(tok_list: Vec<token_handler::token>) -> Parser {
+    fn new(tok_list: Vec<token_handler::Token>) -> Parser {
         return Parser {
             token_list: tok_list,
             current: 0,
@@ -52,7 +54,7 @@ impl Parser {
         return self.equality();
     }
     ///generates binary expression from a left and right expression and an operator
-    fn gen_binary(&self, expr: Expr, op: token_handler::token, right: Expr) -> Expr {
+    fn gen_binary(&self, expr: Expr, op: token_handler::Token, right: Expr) -> Expr {
         let val: &usize = &op.line;
         return Expr::Binary(
             Box::new(expr),
@@ -71,7 +73,7 @@ impl Parser {
         vec.push(Tokentype::BANG_EQUAL);
         vec.push(Tokentype::EQUAL_EQUAL);
         while self.match_type(&vec) {
-            let op: token_handler::token = self.previous();
+            let op: token_handler::Token = self.previous();
             let right: Expr = self.comparison();
             expr = self.gen_binary(expr, op, right);
         }
@@ -155,7 +157,7 @@ impl Parser {
         return Expr::Useless;
     }
     ///consumes current token in tokenlist. Used to match parens and brackets
-    fn consume(&mut self, ty: Tokentype, message: String) -> token_handler::token {
+    fn consume(&mut self, ty: Tokentype, message: String) -> token_handler::Token {
         if self.check(ty) {
             return self.advance();
         }
@@ -163,11 +165,11 @@ impl Parser {
         return token_handler::useless_token();
     }
     ///look at tokenlist without consuming
-    fn peek(&self) -> token_handler::token {
+    fn peek(&self) -> token_handler::Token {
         return (*self.token_list.get(self.current).unwrap()).clone();
     }
     ///get previous token from token list
-    fn previous(&mut self) -> token_handler::token {
+    fn previous(&mut self) -> token_handler::Token {
         return (*self.token_list.get(self.current - 1).unwrap()).clone();
     }
     ///Check if token is expected
@@ -178,7 +180,7 @@ impl Parser {
         return self.peek().t_type == tok;
     }
     ///advances to the next token in the tokenlist
-    fn advance(&mut self) -> token_handler::token {
+    fn advance(&mut self) -> token_handler::Token {
         if !self.is_at_end() {
             self.current += 1;
         }
@@ -199,7 +201,7 @@ impl Parser {
         return false;
     }
     ///synchronize upon finishing an expression. Looking for semicolon
-    fn synchronize(&mut self) {
+    fn _synchronize(&mut self) {
         self.advance();
 
         while !self.is_at_end() {
@@ -222,7 +224,7 @@ impl Parser {
     }
 }
 ///Publiicizes token_list parser
-pub fn parse_token_list(token_list: &mut Vec<token_handler::token>) -> Expr {
+pub fn parse_token_list(token_list: &mut Vec<token_handler::Token>) -> Expr {
     let mut p = Parser::new(token_list.clone());
     return p.expression();
 }
