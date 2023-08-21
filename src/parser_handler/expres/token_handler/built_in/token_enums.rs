@@ -1,4 +1,5 @@
 #[derive(Debug, Clone, PartialEq)]
+///This enum contains the data of the token to be read by the parser. Only contains data for the primitives
 pub enum LiteralData {
     NUM(i32),
     FLOAT(f32),
@@ -8,6 +9,7 @@ pub enum LiteralData {
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
+/// This enum contains a list of all the different tokens that the parser will assign tokens to.
 pub enum Tokentype {
     LEFTP,
     RIGHTP,

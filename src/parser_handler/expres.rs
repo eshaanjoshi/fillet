@@ -3,6 +3,7 @@
 pub mod token_handler;
 
 #[derive(Debug, Clone)]
+///enum containing all expressions our parser looks for
 pub enum Expr {
     Useless,
     Literal(token_handler::built_in::token_enums::LiteralData),
@@ -33,18 +34,21 @@ pub enum Expr {
 }
 
 #[derive(Debug, Clone, Copy)]
+///location struct, currently unused.
 pub struct SourceLocation {
     pub line: usize,
     pub col: i64,
 }
 
 #[derive(Debug, Clone)]
+///logical operation enums
 pub enum LogicalOp {
     Or,
     And,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
+///struct for symbols
 pub struct Symbol {
     pub name: String,
     pub line: usize,
@@ -52,6 +56,7 @@ pub struct Symbol {
 }
 
 #[derive(Debug, Clone)]
+///Struct for function declarations
 pub struct FunDecl {
     pub name: Symbol,
     pub params: Vec<Symbol>,
@@ -59,12 +64,14 @@ pub struct FunDecl {
 }
 
 #[derive(Debug, Clone)]
+///Struct for lambda declarations
 pub struct LambdaDecl {
     pub params: Vec<Symbol>,
     pub body: Vec<Stmt>,
 }
 
 #[derive(Debug, Clone)]
+///struct for class declarations
 pub struct ClassDecl {
     pub name: Symbol,
     pub superclass: Option<Symbol>,
@@ -72,6 +79,7 @@ pub struct ClassDecl {
 }
 
 #[derive(Debug, Clone)]
+///enum of all possible statements our parser can find
 pub enum Stmt {
     Expr(Expr),
     FunDecl(FunDecl),
@@ -85,20 +93,22 @@ pub enum Stmt {
 }
 
 #[derive(Debug, Copy, Clone)]
+///Unary operator type
 pub enum UnaryOpTy {
     Minus,
     Bang,
 }
 
 #[derive(Debug, Clone)]
+///unary operator
 pub struct UnaryOp {
     pub ty: UnaryOpTy,
-    //pub ty:token_handler::token,
     pub line: usize,
     pub col: i64,
 }
 
 #[derive(Debug, Copy, Clone)]
+///Binary operator type
 pub enum BinaryOpTy {
     EqualEqual,
     NotEqual,
@@ -113,6 +123,7 @@ pub enum BinaryOpTy {
 }
 
 #[derive(Debug, Clone)]
+///Binary operator
 pub struct BinaryOp {
     pub ty: BinaryOpTy,
     //pub ty: token_handler::token,
@@ -121,6 +132,7 @@ pub struct BinaryOp {
 }
 
 #[derive(Debug, Clone)]
+///enum of all literal types(all primitives)
 pub enum Literal {
     Number(i64),
     Float(f64),

@@ -4,12 +4,13 @@ use built_in::create_new_keyword_dict;
 use built_in::token_enums::LiteralData;
 use built_in::token_enums::Tokentype;
 use std::collections::HashMap;
-
+///global keyword dictionary
 lazy_static! {
     static ref kw: HashMap<String, Tokentype> = create_new_keyword_dict();
 }
 
 #[derive(Clone, Debug)]
+///This struct represents an individual token that our interpreter generates
 pub struct token {
     pub t_type: Tokentype,
     pub lexeme: String,
@@ -17,10 +18,7 @@ pub struct token {
     pub line: usize,
 }
 
-trait Strrep {
-    fn strrep(&self) -> String;
-}
-
+///Implementation on the tokens struct, implements a new and a string representation
 impl token {
     fn new(ty: Tokentype, lex: String, obj: LiteralData, li: usize) -> token {
         return token {
@@ -38,16 +36,19 @@ impl token {
     }
 }
 
+///Generates a useless token to be thrown away by the parser
 pub fn useless_token() -> token {
     return token::new(Tokentype::USELESS, String::new(), LiteralData::NONE, 0);
 }
 
+///Advances the scanner by one character, and returns the character consumed
 fn advance(source: &String, current: &mut usize) -> char {
     let c = source.as_bytes()[*current] as char;
     *current += 1;
     return c;
 }
 
+///generates a new token
 fn add_token(
     ty: Tokentype,
     obj: LiteralData,
@@ -63,7 +64,7 @@ fn add_token(
     }
     return t;
 }
-
+///Matches the next character in the source with an expected token
 fn match_next(expected: char, current: &mut usize, source: &String) -> bool {
     if *current >= source.len() {
         return true;
@@ -74,7 +75,7 @@ fn match_next(expected: char, current: &mut usize, source: &String) -> bool {
     *current += 1;
     return true;
 }
-
+///Wrapper that lets me send specific token types. Mockup of ternary operator.
 fn match_next_wrap(
     expected: char,
     current: &mut usize,
@@ -89,6 +90,7 @@ fn match_next_wrap(
     return iffalse;
 }
 
+///Look at current character without consuming
 fn peek(current: &mut usize, source: &String) -> char {
     if *current >= source.len() {
         return '\0';
@@ -96,10 +98,12 @@ fn peek(current: &mut usize, source: &String) -> char {
     return source.as_bytes()[*current] as char;
 }
 
+///Look at next character without consuming
 fn peek_next(current: &mut usize, source: &String) -> char {
     return peek(&mut (*current + 1), source);
 }
 
+///Parses from source as if looking for a string
 fn parse_string(current: &mut usize, source: &String, line: &mut usize, start: usize) -> token {
     while peek(current, source) != '"' && (*current < source.len()) {
         if peek(current, source) == '\n' {
@@ -131,7 +135,7 @@ fn is_digit(c: char) -> bool {
 fn is_alpha(c: char) -> bool {
     return c.is_ascii_alphabetic();
 }
-
+///Parses from source as if number. Returns float or int depending on types
 fn parse_number(current: &mut usize, source: &String, start: usize, mut line: usize) -> token {
     let mut is_decimal = false;
     while is_digit(peek(current, source)) {
@@ -165,7 +169,7 @@ fn parse_number(current: &mut usize, source: &String, start: usize, mut line: us
         source,
     );
 }
-
+///Parses from source as if it's an identifier
 fn parse_identifier(current: &mut usize, source: &String, start: usize, mut line: usize) -> token {
     while peek(current, source).is_ascii_alphanumeric() {
         advance(source, current);
@@ -178,7 +182,7 @@ fn parse_identifier(current: &mut usize, source: &String, start: usize, mut line
     }
     return add_token(ttype, LiteralData::NONE, &mut line, *current, start, source);
 }
-
+///Scans from source and returns a token based on scanning
 fn scan_token(source: &String, current: &mut usize, start: usize, line: &mut usize) -> token {
     let c: char = advance(source, current);
     println!("Char read {} {}", c, current);
@@ -391,13 +395,13 @@ fn scan_token(source: &String, current: &mut usize, start: usize, line: &mut usi
         }
     }
 }
-
+///Token List Printer
 pub fn print_token_list(token_list: &mut Vec<token>) {
     for tok in token_list.iter_mut() {
         println!("{}", tok._strrep());
     }
 }
-
+///Scans entire source and returns a list of tokens based on the order they were found in the source
 pub fn scan_tokens(source: String) -> Vec<token> {
     let mut token_list: Vec<token> = Vec::new();
     let mut start: usize;

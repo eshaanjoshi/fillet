@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 pub mod token_enums;
 use token_enums::Tokentype;
+///This function generates the keyword dictionary used by the parser.
 pub fn create_new_keyword_dict() -> HashMap<String, Tokentype> {
     let mut keyword_dict = HashMap::new();
     keyword_dict.insert("and".to_string(), Tokentype::AND);

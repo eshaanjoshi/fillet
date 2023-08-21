@@ -1,8 +1,9 @@
 static mut HAS_ERROR: bool = false;
+///Barebones error handler, reports and error based on the specific problem caught.
 pub fn error(line: usize, message: String) {
     report(line, "".to_string(), message);
 }
-
+///Underlying report function, private, used to report the location to cli
 fn report(line: usize, location: String, message: String) {
     eprintln!(
         "Line {line_no} Error {whe} : {mes}",

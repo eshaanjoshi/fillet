@@ -16,7 +16,7 @@ use parser_handler::expres::token_handler;
 use std::env;
 use std::fs;
 use std::io::Write;
-
+///Runs given line of code
 fn _run(source: String) {
     println!("Input: {input}", input = source);
     let mut t = token_handler::scan_tokens(source);
@@ -24,6 +24,7 @@ fn _run(source: String) {
     token_handler::print_token_list(&mut t);
     println!("{:?}", expr);
 }
+///Prompt wrapper for interactive fillet shell
 fn _run_prompt() {
     println!("Running Prompt");
     loop {
@@ -35,7 +36,7 @@ fn _run_prompt() {
         _run(line);
     }
 }
-
+///file wrapper for fillet interpreter
 fn _run_file(filename: String) {
     println!("Running file: {filename}", filename = filename);
     let contents = fs::read_to_string(filename).expect("File Not Found");
@@ -43,7 +44,7 @@ fn _run_file(filename: String) {
     println!("Contents: {cont}", cont = contents);
     _run(contents);
 }
-
+///fillet startup from command line
 fn cmdline_check() -> bool {
     let argument: Vec<String> = env::args().collect();
     if argument.len() > 2 {
