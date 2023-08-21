@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum LiteralData {
     NUM(i32),
     FLOAT(f32),

@@ -1,3 +1,4 @@
+
 /**
  * Author: Eshaan Joshi, evj@andrew.cmu.edu
  *
@@ -7,14 +8,13 @@
  * Note: At the time of writing this code, I had zero familiarity with Rust. I wanted to learn the language and dive into a project I found interesting, and translating the Java/C heavy book to Rust felt interesting.
  *
  */
-//#![allow(non_camel_case_types())]
-
+#[allow(non_camel_case_types)]
+#[allow(non_upper_case_globals)]
 
 #[macro_use]
 extern crate lazy_static;
-#[allow(non_camel_case_types)]
-#[allow(non_upper_case_globals)]
-pub mod token_handler;
+pub mod parser_handler;
+use parser_handler::expr::token_handler;
 use std::env;
 use std::fs;
 use std::io::Write;
@@ -22,10 +22,10 @@ use std::io::Write;
 
 fn _run(source: String) {
     println!("Input: {input}", input = source);
-    let mut tokenized:Vec<token_handler::token> = token_handler::scan_tokens(source);
-    token_handler::print_token_list(&mut tokenized);
+    let mut t = token_handler::scan_tokens(source);
+    parser_handler::parse_token_list(&mut t);
+    token_handler::print_token_list(&mut t);
 }
-
 fn _run_prompt() {
     println!("Running Prompt");
     loop {

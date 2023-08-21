@@ -9,6 +9,7 @@ lazy_static! {
     static ref kw: HashMap<String, Tokentype> = create_new_keyword_dict();
 }
 
+#[derive(Clone, Debug)]
 pub struct token {
     t_type: Tokentype,
     lexeme: String,
