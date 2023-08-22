@@ -17,18 +17,24 @@ pub mod expres;
 pub mod built_in;
 pub mod error_handler;
 pub mod token_enums;
+pub mod accepter;
 //use parser_handler::expres::token_handler;
 pub mod token_handler;
 use std::env;
 use std::fs;
 use std::io::Write;
+
+use crate::eval::evaluate;
 ///Runs given line of code
 fn _run(source: String) {
     println!("Input: {input}", input = source);
     let mut t = token_handler::scan_tokens(source);
     let expr = parser_handler::parse_token_list(&mut t);
     token_handler::print_token_list(&mut t);
+    
     println!("{:?}", expr);
+    let val = evaluate(expr);
+    println!("{:?}", val);
 }
 ///Prompt wrapper for interactive fillet shell
 fn _run_prompt() {
