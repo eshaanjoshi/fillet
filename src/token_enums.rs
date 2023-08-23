@@ -9,6 +9,18 @@ pub enum LiteralData {
     NONE,
 }
 
+impl LiteralData {
+    pub fn string_rep(&self)->String{
+        match self{
+            LiteralData::BOOL(val) => return (*val).to_string(),
+            LiteralData::NUM(val) => return (*val).to_string(),
+            LiteralData::FLOAT(val) => return (*val).to_string(),
+            LiteralData::STR(val) => return (*val).to_string(),
+            LiteralData::NONE => return ("").to_string(),
+        }
+    }
+}
+
 #[derive(PartialEq, Debug, Clone, Copy)]
 /// This enum contains a list of all the different tokens that the parser will assign tokens to.
 pub enum Tokentype {

@@ -7,9 +7,9 @@ use crate::built_in;
 use built_in::create_new_keyword_dict;
 //use built_in::token_enums::LiteralData;
 //use built_in::token_enums::Tokentype;
+use crate::error_handler;
 use crate::token_enums::LiteralData;
 use crate::token_enums::Tokentype;
-use crate::error_handler;
 use std::collections::HashMap;
 
 lazy_static! {

@@ -11,30 +11,31 @@
 #[allow(non_upper_case_globals)]
 #[macro_use]
 extern crate lazy_static;
-pub mod parser_handler;
-pub mod eval;
-pub mod expres;
+pub mod accepter;
 pub mod built_in;
 pub mod error_handler;
+pub mod eval;
+pub mod expres;
+pub mod parser_handler;
 pub mod token_enums;
-pub mod accepter;
+pub mod typecheck;
 //use parser_handler::expres::token_handler;
 pub mod token_handler;
 use std::env;
 use std::fs;
 use std::io::Write;
-
-use crate::eval::evaluate;
+use crate::eval::eval_stmt_list;
 ///Runs given line of code
 fn _run(source: String) {
     println!("Input: {input}", input = source);
     let mut t = token_handler::scan_tokens(source);
-    let expr = parser_handler::parse_token_list(&mut t);
+    //let expr = parser_handler::parse_token_list(&mut t);
     token_handler::print_token_list(&mut t);
-    
-    println!("{:?}", expr);
-    let val = evaluate(expr);
-    println!("{:?}", val);
+    let stmt_list = parser_handler::parse_stmt(&mut t);
+    eval_stmt_list(stmt_list);
+    //println!("{:?}", expr);
+    //let val = interpret(expr);
+    //println!("{:?}", val);
 }
 ///Prompt wrapper for interactive fillet shell
 fn _run_prompt() {

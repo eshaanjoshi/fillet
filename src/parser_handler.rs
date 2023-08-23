@@ -1,7 +1,8 @@
 #[allow(non_camel_case_types)]
 use crate::expres;
-use std::process::exit;
+use crate::expres::Stmt;
 use crate::token_handler;
+use std::process::exit;
 //use expres::token_handler;
 use expres::Expr;
 //use token_handler::built_in::token_enums::LiteralData;
@@ -158,6 +159,7 @@ impl Parser {
     }
     ///consumes current token in tokenlist. Used to match parens and brackets
     fn consume(&mut self, ty: Tokentype, message: String) -> token_handler::Token {
+        println!("consume test{:?}{:?}", ty, self.peek().t_type);
         if self.check(ty) {
             return self.advance();
         }
@@ -222,9 +224,48 @@ impl Parser {
             self.advance();
         }
     }
+    fn print(&mut self)->Stmt{
+        self.advance();
+        let value = self.expression();
+
+        let err = self.consume(Tokentype::SEMI, "Expect ; at end of expression.".to_string());
+        match err.t_type{
+            Tokentype::USELESS => exit(1),
+            _=>(),
+        }
+        return Stmt::Print(value);
+    }
+    fn statement(&mut self)->Stmt{
+        match self.peek().t_type{
+            Tokentype::PRINT => return self.print(),
+            _=>self.expression_stmt(),
+        }
+    }
+    fn expression_stmt(&mut self)->Stmt{
+        let value = self.expression();
+        self.consume(Tokentype::SEMI, "Expect ; at end of expression.".to_string());
+        return Stmt::Expr(value);
+    }
+    fn parse_statement(&mut self) -> Vec<Stmt>{
+        let mut stmt_list:Vec<Stmt> = Vec::new();
+        while !self.is_at_end(){
+            stmt_list.push(self.statement());
+        }
+
+
+        return stmt_list;
+    }
 }
 ///Publiicizes token_list parser
 pub fn parse_token_list(token_list: &mut Vec<token_handler::Token>) -> Expr {
     let mut p = Parser::new(token_list.clone());
     return p.expression();
 }
+pub fn parse_stmt(token_list: &mut Vec<token_handler::Token>) -> Vec<Stmt> {
+    let mut p = Parser::new(token_list.clone());
+    return p.parse_statement();
+}
+
+
+
+
