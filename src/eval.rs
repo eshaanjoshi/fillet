@@ -1,11 +1,11 @@
 use crate::accepter;
-use crate::error_handler::fatal_error;
+use crate::error_handler;
 use crate::expres::Expr;
 use crate::expres::Stmt;
 use crate::token_enums::LiteralData;
 use crate::typecheck;
 
-pub struct tagged_stmt{
+pub struct TaggedStmt{
     stmt: Stmt,
     valid: bool,
 }
@@ -21,7 +21,7 @@ pub fn eval_stmt_list(stmt_list:Vec<Stmt>){
     }
 }
 
-pub fn eval_typechecked_list(stmt_list:Vec<tagged_stmt>){
+pub fn eval_typechecked_list(stmt_list:Vec<TaggedStmt>){
     for stmt in stmt_list{
         if stmt.valid
         {
@@ -33,13 +33,16 @@ pub fn eval_typechecked_list(stmt_list:Vec<tagged_stmt>){
     }  
 }
 
-pub fn typechecker(stmt_list:Vec<Stmt>)->Vec<tagged_stmt>{
-    let mut tagged: Vec<tagged_stmt> = Vec::new();
+pub fn typechecker(stmt_list:Vec<Stmt>)->Vec<TaggedStmt>{
+    let mut tagged: Vec<TaggedStmt> = Vec::new();
     for stmt in &stmt_list{
         match typecheck::typecheck_stmt(stmt.clone()){
-            None => {fatal_error(); tagged.push(tagged_stmt { stmt: stmt.clone(), valid: false })}
+            None => {{
+                error_handler::type_error();
+                //exit(1);
+            }; tagged.push(TaggedStmt { stmt: stmt.clone(), valid: false })}
             Some(_)=>{
-                tagged.push(tagged_stmt { stmt: stmt.clone(), valid: true })
+                tagged.push(TaggedStmt { stmt: stmt.clone(), valid: true })
             }
         }
     }

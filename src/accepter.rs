@@ -1,5 +1,6 @@
 use std::process::exit;
 
+use crate::error_handler::fatal_error;
 use crate::expres::BinaryOpTy;
 use crate::expres::Expr;
 use crate::expres::Stmt;
@@ -12,11 +13,13 @@ fn mathint(x: LiteralData, y: LiteralData, f: fn(i32, i32) -> i32) -> LiteralDat
     if let LiteralData::NUM(_x_int) = x {
         x_int = _x_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     if let LiteralData::NUM(_y_int) = y {
         y_int = _y_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     return LiteralData::NUM(f(x_int, y_int));
@@ -28,11 +31,13 @@ fn mathfloat(x: LiteralData, y: LiteralData, f: fn(f32, f32) -> f32) -> LiteralD
     if let LiteralData::FLOAT(_x_int) = x {
         x_int = _x_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     if let LiteralData::FLOAT(_y_int) = y {
         y_int = _y_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     return LiteralData::FLOAT(f(x_int, y_int));
@@ -43,11 +48,13 @@ fn strcat(x: LiteralData, y: LiteralData, f: fn(String, String) -> String) -> Li
     if let LiteralData::STR(_x_int) = x {
         x_int = _x_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     if let LiteralData::STR(_y_int) = y {
         y_int = _y_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     return LiteralData::STR(f(x_int, y_int));
@@ -58,11 +65,13 @@ fn compint(left: LiteralData, right: LiteralData, f: fn(a: i32, b: i32) -> bool)
     if let LiteralData::NUM(_x_int) = left {
         x_int = _x_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     if let LiteralData::NUM(_y_int) = right {
         y_int = _y_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     return LiteralData::BOOL(f(x_int, y_int));
@@ -74,11 +83,13 @@ fn compfloat(left: LiteralData, right: LiteralData, f: fn(a: f32, b: f32) -> boo
     if let LiteralData::FLOAT(_x_int) = left {
         x_int = _x_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     if let LiteralData::FLOAT(_y_int) = right {
         y_int = _y_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     return LiteralData::BOOL(f(x_int, y_int));
@@ -90,11 +101,13 @@ fn compbool(left: LiteralData, right: LiteralData, f: fn(a: bool, b: bool) -> bo
     if let LiteralData::BOOL(_x_int) = left {
         x_int = _x_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     if let LiteralData::BOOL(_y_int) = right {
         y_int = _y_int
     } else {
+        fatal_error("INTERPRETER".to_string(), "Typechecking failed".to_string(), 0);
         exit(1);
     }
     return LiteralData::BOOL(f(x_int, y_int));
