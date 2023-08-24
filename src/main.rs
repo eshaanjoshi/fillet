@@ -20,39 +20,46 @@ pub mod parser_handler;
 pub mod token_enums;
 pub mod typecheck;
 pub mod token_handler;
+pub mod environ;
+use environ::EnvDefinitions;
 use std::env;
 use std::fs;
 use std::io::Write;
-use crate::eval::eval_typechecked_list;
-use eval::typechecker;
+use crate::eval::eval_stmt_list;
 ///Runs given line of code
-fn _run(source: String) {
+fn _run(source: String, environ:&mut EnvDefinitions) {
     println!("Input: {input}", input = source);
     let mut t = token_handler::scan_tokens(source);
+    println!("here");
     token_handler::print_token_list(&mut t);
+    println!("here2");
     let stmt_list = parser_handler::parse_stmt(&mut t);
-    let typechecked_stmt_list = typechecker(stmt_list.clone());
-    eval_typechecked_list(typechecked_stmt_list);
+    println!("here3");
+    //let typechecked_stmt_list = typechecker(stmt_list.clone());
+    //eval_typechecked_list(typechecked_stmt_list);
+    eval_stmt_list(stmt_list, environ);
 }
 ///Prompt wrapper for interactive fillet shell
 fn _run_prompt() {
     println!("Running Prompt");
+    let mut environ = EnvDefinitions::new();
     loop {
         print!(">>>");
         let _ = std::io::stdout().flush();
         let mut line = String::new();
         std::io::stdin().read_line(&mut line).unwrap();
         println!("");
-        _run(line);
+        _run(line, &mut environ);
     }
 }
 ///file wrapper for fillet interpreter
 fn _run_file(filename: String) {
     println!("Running file: {filename}", filename = filename);
     let contents = fs::read_to_string(filename).expect("File Not Found");
+    let mut environ = EnvDefinitions::new();
 
     println!("Contents: {cont}", cont = contents);
-    _run(contents);
+    _run(contents, &mut environ);
 }
 ///fillet startup from command line
 fn cmdline_check() -> bool {

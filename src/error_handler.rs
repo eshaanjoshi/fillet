@@ -17,7 +17,7 @@ pub fn type_error() {
 
 pub fn fatal_error(errortype:String, message:String, location:usize){
     eprintln!("FATAL {} ERROR: Error {} at line {}", errortype, message, location);
-    exit(1);
+    //exit(1);
 }
 
 ///Underlying report function, private, used to report the location to cli

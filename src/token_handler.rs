@@ -208,7 +208,7 @@ fn scan_token(source: &String, current: &mut usize, start: usize, line: &mut usi
                 source,
             )
         }
-        '[' => {
+        '{' => {
             return add_token(
                 Tokentype::LEFTB,
                 LiteralData::NONE,
@@ -218,7 +218,7 @@ fn scan_token(source: &String, current: &mut usize, start: usize, line: &mut usi
                 source,
             )
         }
-        ']' => {
+        '}' => {
             return add_token(
                 Tokentype::RIGHTB,
                 LiteralData::NONE,
@@ -400,6 +400,7 @@ fn scan_token(source: &String, current: &mut usize, start: usize, line: &mut usi
 pub fn print_token_list(token_list: &mut Vec<Token>) {
     for tok in token_list.iter_mut() {
         println!("{}", tok._strrep());
+        println!("last");
     }
 }
 ///Scans entire source and returns a list of tokens based on the order they were found in the source

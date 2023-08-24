@@ -1,6 +1,7 @@
 #[allow(non_camel_case_types)]
 use crate::expres;
 use crate::expres::Stmt;
+use crate::expres::Symbol;
 use crate::token_handler;
 use std::process::exit;
 //use expres::token_handler;
@@ -50,9 +51,29 @@ impl Parser {
             current: 0,
         };
     }
+
+    fn assignment(&mut self)->Expr{
+        let expr = self.equality();
+        if self.match_type(&vec![Tokentype::EQUAL]){
+            //self.advance();
+            let value = self.assignment();
+            match expr {
+                Expr::Variable(sym) =>{
+                    return Expr::Assign(sym, Box::new(value));
+                },
+                _=>{
+                    
+                    //error(equals.line, "Invalid assignmen target.".to_string());
+                },
+            }
+            
+        }
+        return expr;
+    }
     ///an expression collapses to equality
     fn expression(&mut self) -> Expr {
-        return self.equality();
+        //return self.equality();
+        return self.assignment();
     }
     ///generates binary expression from a left and right expression and an operator
     fn gen_binary(&self, expr: Expr, op: token_handler::Token, right: Expr) -> Expr {
@@ -155,11 +176,14 @@ impl Parser {
             self.consume(Tokentype::RIGHTP, "Missing )!!!".to_string());
             return Expr::Grouping(Box::new(expr));
         }
+        if self.match_type(&vec![Tokentype::IDENTIFIER]){
+            let val = self.previous();
+            return Expr::Variable(Symbol { name: val.lexeme, line: val.line, col: 0 });
+        }
         return Expr::Useless;
     }
     ///consumes current token in tokenlist. Used to match parens and brackets
     fn consume(&mut self, ty: Tokentype, message: String) -> token_handler::Token {
-        println!("consume test{:?}{:?}", ty, self.peek().t_type);
         if self.check(ty) {
             return self.advance();
         }
@@ -235,13 +259,53 @@ impl Parser {
         }
         return Stmt::Print(value);
     }
+
+    fn block(&mut self)->Stmt{
+        return Stmt::Block(self.block_stmt());
+    }
+
+    fn block_stmt(&mut self)->Vec<Stmt>{
+        let mut values: Vec<Stmt> = Vec::new();
+        self.advance();
+        while !self.check(Tokentype::RIGHTB)&&!self.is_at_end(){
+            values.push(self.declaration());
+        }
+        self.consume(Tokentype::RIGHTB, "Expect } after block.".to_string());
+        println!("hello??");
+        println!("{:?}", values);
+        return values;
+    }
     fn statement(&mut self)->Stmt{
+        println!("stmt");
         match self.peek().t_type{
             Tokentype::PRINT => return self.print(),
+            Tokentype::LEFTB => return self.block(),
             _=>self.expression_stmt(),
         }
     }
+    fn declaration(&mut self) -> Stmt{
+       match self.peek().t_type{
+            Tokentype::VAR => {return self.var_declaration();},
+            _=>{();},
+
+        }
+        return self.statement();
+
+    }
+    fn var_declaration(&mut self) -> Stmt{
+        self.advance();
+        let val = self.consume(Tokentype::IDENTIFIER, "Expecting Variable Name.".to_string());
+        let tok = Symbol{name: val.lexeme, line:val.line, col:0};
+        let mut init = Expr::Useless;
+
+        if self.match_type(&vec![Tokentype::EQUAL]){
+            init = self.expression();
+        }
+        self.consume(Tokentype::SEMI, "Expect ; at end of expression".to_string());
+        return Stmt::VarDecl(tok, Some(init));
+    }
     fn expression_stmt(&mut self)->Stmt{
+        //self.advance();
         let value = self.expression();
         self.consume(Tokentype::SEMI, "Expect ; at end of expression.".to_string());
         return Stmt::Expr(value);
@@ -249,7 +313,7 @@ impl Parser {
     fn parse_statement(&mut self) -> Vec<Stmt>{
         let mut stmt_list:Vec<Stmt> = Vec::new();
         while !self.is_at_end(){
-            stmt_list.push(self.statement());
+            stmt_list.push(self.declaration());
         }
 
 

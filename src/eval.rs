@@ -3,6 +3,7 @@ use crate::error_handler;
 use crate::expres::Expr;
 use crate::expres::Stmt;
 use crate::token_enums::LiteralData;
+use crate::environ::EnvDefinitions;
 use crate::typecheck;
 
 pub struct TaggedStmt{
@@ -10,22 +11,22 @@ pub struct TaggedStmt{
     valid: bool,
 }
 
-pub fn interpret(expr: Expr) -> LiteralData {
-    return accepter::evaluate(expr);
+pub fn interpret(expr: Expr, environ:&mut EnvDefinitions) -> LiteralData {
+    return accepter::evaluate(expr, environ);
 }
 
 
-pub fn eval_stmt_list(stmt_list:Vec<Stmt>){
+pub fn eval_stmt_list(stmt_list:Vec<Stmt>, environ:&mut EnvDefinitions){
     for stmt in stmt_list{
-        accepter::execute(stmt);
+        accepter::execute(stmt, environ);
     }
 }
 
-pub fn eval_typechecked_list(stmt_list:Vec<TaggedStmt>){
+pub fn eval_typechecked_list(stmt_list:Vec<TaggedStmt>, environ:&mut EnvDefinitions){
     for stmt in stmt_list{
         if stmt.valid
         {
-            accepter::execute(stmt.stmt);
+            accepter::execute(stmt.stmt, environ);
         }
         else{
             eprintln!("Skipping statement {:?} due to a reported error.", stmt.stmt);

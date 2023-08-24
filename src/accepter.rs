@@ -1,11 +1,23 @@
 use std::process::exit;
+use std::sync::Mutex;
 
+use crate::environ::EnvDefinitions;
+use crate::error_handler;
+use crate::error_handler::error;
 use crate::error_handler::fatal_error;
 use crate::expres::BinaryOpTy;
 use crate::expres::Expr;
 use crate::expres::Stmt;
+use crate::expres::Symbol;
 use crate::expres::UnaryOpTy;
 use crate::token_enums::LiteralData;
+use crate::environ;
+
+lazy_static! {
+    ///global keyword dictionary
+    static ref ENVIR: Mutex<environ::EnvDefinitions> = Mutex::new(environ::EnvDefinitions::new());
+}
+
 
 fn mathint(x: LiteralData, y: LiteralData, f: fn(i32, i32) -> i32) -> LiteralData {
     let x_int;
@@ -151,10 +163,10 @@ fn comp_op(left: LiteralData, right: LiteralData, op: BinaryOpTy) -> LiteralData
     }
 }
 
-fn binary(expr: Expr) -> LiteralData {
+fn binary(expr: Expr, environ:&mut EnvDefinitions) -> LiteralData {
     if let Expr::Binary(left, op, right) = expr {
-        let left_data = evaluate(*left);
-        let right_data = evaluate(*right);
+        let left_data = evaluate(*left, environ);
+        let right_data = evaluate(*right, environ);
         match op.ty {
             BinaryOpTy::Minus => match left_data {
                 LiteralData::NUM(_) => {
@@ -218,9 +230,9 @@ fn truthy(a: LiteralData) -> bool {
     }
 }
 
-fn unary(expr: Expr) -> LiteralData {
+fn unary(expr: Expr, environ:&mut EnvDefinitions) -> LiteralData {
     if let Expr::Unary(op, expr) = expr {
-        let val = evaluate(*expr);
+        let val = evaluate(*expr, environ);
         match op.ty {
             UnaryOpTy::Minus => match val {
                 LiteralData::FLOAT(f) => return LiteralData::FLOAT(-f),
@@ -236,9 +248,9 @@ fn unary(expr: Expr) -> LiteralData {
         exit(1);
     }
 }
-pub fn evaluate(expr: Expr) -> LiteralData {
+pub fn evaluate(expr: Expr, environ:&mut EnvDefinitions) -> LiteralData {
     println!("Eval: {:?}", expr);
-    return accept(expr);
+    return accept(expr, environ);
 }
 pub fn literal(expr: Expr) -> LiteralData {
     if let Expr::Literal(test) = expr {
@@ -248,38 +260,90 @@ pub fn literal(expr: Expr) -> LiteralData {
     }
 }
 
-pub fn grouping(expr: Expr) -> LiteralData {
+pub fn grouping(expr: Expr, environ:&mut EnvDefinitions) -> LiteralData {
     if let Expr::Grouping(test) = expr {
-        return evaluate(*test);
+        return evaluate(*test, environ);
     } else {
         exit(1);
     }
 }
-pub fn accept(expr: Expr) -> LiteralData {
+
+pub fn assign(sym:Symbol, expr:Expr, environ:&mut EnvDefinitions)->LiteralData{
+    let value = evaluate(expr, environ);
+    let mut hashmap: std::sync::MutexGuard<'_, environ::EnvDefinitions> = ENVIR.lock().unwrap();
+    hashmap.define(sym.name, value.clone());
+    return value;
+}
+
+
+
+pub fn accept(expr: Expr, environ:&mut EnvDefinitions) -> LiteralData {
     // -> impl Fn(Expr) -> token_enums::LiteralData{
     match expr {
-        Expr::Binary(_, _, _) => return binary(expr),
-        Expr::Unary(_, _) => return unary(expr),
+        Expr::Binary(_, _, _) => return binary(expr, environ),
+        Expr::Unary(_, _) => return unary(expr, environ),
         Expr::Literal(_) => return literal(expr),
-        Expr::Grouping(_) => return grouping(expr),
+        Expr::Grouping(_) => return grouping(expr, environ),
+        Expr::Variable(_) => return var_expr(expr, environ),
+        Expr::Assign(sym, exp) => return assign(sym.clone(), *exp, environ),
         _ => exit(1),
     }
 }
 
-pub fn print(expr: Expr){
-    let value = evaluate(expr);
+pub fn print(expr: Expr, environ:&mut EnvDefinitions){
+    let value = evaluate(expr, environ);
     println!("{}", value.string_rep());
 }
 
-pub fn expression(expr:Expr){
-    evaluate(expr);
+pub fn var(val: Symbol, expr: Option<Expr>, environ:&mut EnvDefinitions){
+    let mut value = LiteralData::NONE;
+    match expr{
+        Some(expres) => {
+            value = evaluate(expres, environ);
+            
+        }
+        None => {},
+    }
+    //let mut hashmap = ENVIR.lock().unwrap();
+    //hashmap.define(val.name, value);
+    environ.define(val.name, value);
+}
+
+pub fn var_expr(expr:Expr, environ:&mut EnvDefinitions) -> LiteralData{
+    let symb: Symbol;
+    match expr {
+        Expr::Variable(sym) => {symb = sym;}
+        _=>exit(1),
+    }
+    //let mut hashmap = ENVIR.lock().unwrap();
+    //let val = hashmap.get_from_string(symb.name);
+    let val = environ.get_from_string(symb.name);
+    match val{
+        None => {error_handler::fatal_error("RUNTIME".to_string(), "Uninitialized Variable".to_string(), symb.line); return LiteralData::NONE},
+        _=>{},
+    }
+    return val.unwrap();
+}
+
+pub fn block(stmts:Vec<Stmt>, environ:&mut EnvDefinitions){
+    let mut new_env = EnvDefinitions::new_enclosed(environ);
+    for stmt in stmts{
+        execute(stmt, &mut new_env);
+    }
+}
+
+pub fn expression(expr:Expr, environ:&mut EnvDefinitions){
+    evaluate(expr, environ);
+    //assignment(expr);
 }
 
 
-pub fn execute(stmt:Stmt) {
+pub fn execute(stmt:Stmt, environ:&mut EnvDefinitions) {
     match stmt{
-        Stmt::Print(expr) => print(expr),
-        Stmt::Expr(expr)=>expression(expr),
+        Stmt::Print(expr) => print(expr, environ),
+        Stmt::Expr(expr)=>expression(expr, environ),
+        Stmt::VarDecl(sym, expr) => var(sym, expr, environ),
+        Stmt::Block(stmts) => block(stmts, environ),
         _=>exit(1),
     }
 }

@@ -1,4 +1,4 @@
-use crate::{expres::{Stmt, Expr, UnaryOp, BinaryOp, UnaryOpTy, BinaryOpTy, Literal}, token_enums::LiteralData, error_handler::error};
+use crate::{expres::{Stmt, Expr, UnaryOp, BinaryOp, UnaryOpTy, BinaryOpTy}, token_enums::LiteralData, error_handler::error};
 
 fn unary(op:UnaryOp, expr:Expr)->Option<LiteralData>{
     let val = typecheck_expr(expr);
@@ -92,6 +92,7 @@ pub fn typecheck_expr(expr:Expr)->Option<LiteralData>{
         Expr::Unary(op, expr) => {return unary(op, *expr);},
         Expr::Binary(left, op, right) => {return binary(*left, op, *right);}
         Expr::Grouping(expr) => typecheck_expr(*expr),
+        //Expr::Variable()
         _=>None,
     }
 }
