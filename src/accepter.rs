@@ -5,8 +5,10 @@ use crate::environ::EnvDefinitions;
 use crate::error_handler;
 use crate::error_handler::error;
 use crate::error_handler::fatal_error;
+use crate::eval;
 use crate::expres::BinaryOpTy;
 use crate::expres::Expr;
+use crate::expres::LogicalOp;
 use crate::expres::Stmt;
 use crate::expres::Symbol;
 use crate::expres::UnaryOpTy;
@@ -276,6 +278,23 @@ pub fn assign(sym:Symbol, expr:Expr, environ:&mut EnvDefinitions)->LiteralData{
 }
 
 
+pub fn logical(expr:Box<Expr>, op:LogicalOp, right:Box<Expr>, environ:&mut EnvDefinitions)->LiteralData{
+    let left = evaluate(*expr, environ);
+    let leftcl = left.clone();
+    match op{
+        LogicalOp::Or =>{
+            if truthy(leftcl){
+                return left;
+            }
+        }
+        LogicalOp::And=>{
+            if !truthy(leftcl) {
+                return left;
+            }
+        }
+    }
+    return evaluate(*right, environ);
+}
 
 pub fn accept(expr: Expr, environ:&mut EnvDefinitions) -> LiteralData {
     // -> impl Fn(Expr) -> token_enums::LiteralData{
@@ -286,6 +305,7 @@ pub fn accept(expr: Expr, environ:&mut EnvDefinitions) -> LiteralData {
         Expr::Grouping(_) => return grouping(expr, environ),
         Expr::Variable(_) => return var_expr(expr, environ),
         Expr::Assign(sym, exp) => return assign(sym.clone(), *exp, environ),
+        Expr::Logical(expr, op, right) => return logical(expr, op, right, environ),
         _ => exit(1),
     }
 }
@@ -337,6 +357,17 @@ pub fn expression(expr:Expr, environ:&mut EnvDefinitions){
     //assignment(expr);
 }
 
+pub fn ifstmt(expr:Expr,then:Box<Stmt> , elsebranch:Option<Box<Stmt>>, environ:&mut EnvDefinitions){
+    if truthy(evaluate(expr, environ)){
+        execute(*then, environ);
+        return;
+    }
+    match elsebranch{
+        Some(el)=> execute(*el, environ),
+        None => (),
+    }
+}
+
 
 pub fn execute(stmt:Stmt, environ:&mut EnvDefinitions) {
     match stmt{
@@ -344,6 +375,7 @@ pub fn execute(stmt:Stmt, environ:&mut EnvDefinitions) {
         Stmt::Expr(expr)=>expression(expr, environ),
         Stmt::VarDecl(sym, expr) => var(sym, expr, environ),
         Stmt::Block(stmts) => block(stmts, environ),
+        Stmt::If(cond,then , elsebranch) => ifstmt(cond, then, elsebranch, environ),
         _=>exit(1),
     }
 }

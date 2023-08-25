@@ -1,17 +1,16 @@
+use crate::accepter::expression;
 #[allow(non_camel_case_types)]
 use crate::expres;
+use crate::expres::LogicalOp;
 use crate::expres::Stmt;
 use crate::expres::Symbol;
 use crate::token_handler;
+use crate::token_handler::Token;
+use std::borrow::BorrowMut;
 use std::process::exit;
-//use expres::token_handler;
 use expres::Expr;
-//use token_handler::built_in::token_enums::LiteralData;
-//use token_handler::built_in::token_enums::Tokentype;
 use crate::token_enums::LiteralData;
 use crate::token_enums::Tokentype;
-//use self::expres::token_handler::error_handler;
-//use token_handler::error_handler;
 use crate::error_handler;
 ///Parser struct
 pub struct Parser {
@@ -51,9 +50,35 @@ impl Parser {
             current: 0,
         };
     }
-
+    fn and(&mut self)->Expr{
+        let mut expr = self.equality();
+        while self.match_type(&vec![Tokentype::AND]){
+            let op = self.previous();            let mut opty;
+            let right = self.and();
+            match op.t_type{
+                Tokentype::AND => {opty=LogicalOp::Or;},
+                _=>{opty=LogicalOp::And},
+            }
+            expr = Expr::Logical(Box::new(expr), opty, Box::new(right))
+        }
+        return expr;
+    }
+    fn or(&mut self )->Expr{
+        let mut expr = self.and();
+        while self.match_type(&vec![Tokentype::OR]){
+            let op = self.previous();
+            let opty;
+            let right = self.and();
+            match op.t_type{
+                Tokentype::OR => {opty=LogicalOp::Or;},
+                _=>{opty = LogicalOp::Or},
+            }
+            expr = Expr::Logical(Box::new(expr), opty, Box::new(right));
+        }
+        return expr;
+    }
     fn assignment(&mut self)->Expr{
-        let expr = self.equality();
+        let expr = self.or();//self.equality();
         if self.match_type(&vec![Tokentype::EQUAL]){
             //self.advance();
             let value = self.assignment();
@@ -275,9 +300,24 @@ impl Parser {
         println!("{:?}", values);
         return values;
     }
+
+    fn ifstatement(&mut self) -> Stmt{
+        self.consume(Tokentype::LEFTP, "Expect '( after 'if'".to_string());
+        let cond = self.expression();
+        self.consume(Tokentype::RIGHTP, "Expect ')' after if condition".to_string());
+
+        let then = self.statement();
+        let mut elsebranch:Option<Box<Stmt>> = None;
+        if self.match_type(&vec![Tokentype::ELSE]){
+            elsebranch = Some(Box::new(self.statement()));
+        }
+        return Stmt::If(cond, Box::new(then), elsebranch);
+    }
+
     fn statement(&mut self)->Stmt{
         println!("stmt");
         match self.peek().t_type{
+            Tokentype::IF=> return self.ifstatement(),
             Tokentype::PRINT => return self.print(),
             Tokentype::LEFTB => return self.block(),
             _=>self.expression_stmt(),
